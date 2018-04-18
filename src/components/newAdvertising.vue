@@ -12,7 +12,7 @@
           </div>
       </div>
 
-<el-container style="height: 500px; border: 1px solid #eee">
+<el-container style="height: 100%; border: 1px solid #eee">
   <el-aside width="200px" style="background-color: rgb(238, 241, 246)">
     <el-menu :default-openeds="['1', '3']">
       <el-submenu index="1">
@@ -67,22 +67,39 @@
       <div>
         着陆页地址： <input type="text" placeholder="请设置广告名称">  预览
       </div>
-      
+
+
+      <div>
+         上传图片：<label for=""></label> 
+         <input type="file" @change='fileChange'>
+      </div>
+      <br>
+      <br>
+      <br>
+
       <h4>上传创意</h4>
       <div style="color:red" @click="btn">+添加创意</div>
 
 
-      <!-- 添加图片 -->
+      <!-- 单张添加图片 -->
       <div :style="addImgsum == 1? 'display:block':'display:none'">
-        <el-upload
-          class="avatar-uploader"
-          action="http://localhost:9000/dsp-creative/creative/upload"
-          :show-file-list="false"
-          :on-success="handleAvatarSuccess"
-          :before-upload="beforeAvatarUpload">
-          <img v-if="imageUrl" :src="imageUrl" class="avatar">
-          <i v-else class="el-icon-plus avatar-uploader-icon"></i>
-        </el-upload>
+          <!-- 上传组件  -->
+          <Upload></Upload>
+      </div>
+      <!-- 多张添加图片 -->
+      <div :style="addImgsum == 2? 'display:block':'display:none'">
+          <el-tabs v-model="activeName" @tab-click="handleClick">
+            
+
+            <el-tab-pane v-for='(item,index) in ElTabPaneArr' :key="index" :label="item.title" :name="item.name">
+                <!-- 上传组件  -->
+                <Upload></Upload>
+            </el-tab-pane>
+
+            <el-tab-pane label="+添加创意" name="fourth"></el-tab-pane> 
+          </el-tabs>
+
+          
       </div>
 
 
@@ -98,6 +115,9 @@
 
 
 <script>
+    //上传组件
+    import Upload from '@/views/Upload.vue'
+
     export default {
         data() {
             const item = {
@@ -107,27 +127,24 @@
             };
             return {
                 tableData: Array(20).fill(item),
-                imageUrl: '',
-                addImgsum:0
+                
+                addImgsum:0,
+                activeName: 'second',
+                ElTabPaneArr:[
+                  {
+                    title:'创意1',
+                    name:"new1"
+                  },
+                  {
+                    title:'创意2',
+                    name:"new2"
+                  }
+                ],
+                ElTabPaneArrAge:2
             }
         },
         methods: {
-          handleAvatarSuccess(res, file) {
-            console.log(res,file)
-            this.imageUrl = URL.createObjectURL(file.raw);
-          },
-          beforeAvatarUpload(file) {
-            const isJPG = file.type === 'image/jpeg';
-            const isLt2M = file.size / 1024 / 1024 < 2;
-
-            if (!isJPG) {
-              this.$message.error('上传头像图片只能是 JPG 格式!');
-            }
-            if (!isLt2M) {
-              this.$message.error('上传头像图片大小不能超过 2MB!');
-            }
-            return isJPG && isLt2M;
-          },
+          
           //添加创意
           btn() {
             this.$refs.newAdvertising_mark.style.display = 'block';
@@ -140,7 +157,21 @@
                 this.addImgsum = 2
               }
               this.$refs.newAdvertising_mark.style.display = 'none';
+          },
+          handleClick(tab, event) {
+            document.querySelector('.el-tabs__active-bar').style.background = "#409EFF"
+            if(tab.name == 'fourth') {
+               document.querySelector('.el-tabs__active-bar').style.background = "#e4e7ed"
+               this.ElTabPaneArr.push({title:`创建${++this.ElTabPaneArrAge}`,name:`new${this.ElTabPaneArrAge}`})
+            }
+            // console.log(tab, event);
+          },
+          fileChange(e) {
+            console.log(e.target.files)
           }
+        },
+        components:{
+          Upload
         }
     };
 
@@ -157,29 +188,7 @@
   .el-aside {
     color: #333;
   }
-   .avatar-uploader .el-upload {
-    border: 1px dashed #d9d9d9;
-    border-radius: 6px;
-    cursor: pointer;
-    position: relative;
-    overflow: hidden;
-  }
-  .avatar-uploader .el-upload:hover {
-    border-color: #409EFF;
-  }
-  .avatar-uploader-icon {
-    font-size: 28px;
-    color: #8c939d;
-    width: 178px;
-    height: 178px;
-    line-height: 178px;
-    text-align: center;
-  }
-  .avatar {
-    width: 178px;
-    height: 178px;
-    display: block;
-  }
+   
 
   #newAdvertising {
     width:100%;
